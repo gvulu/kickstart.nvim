@@ -176,10 +176,10 @@ vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagn
 vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
 
 -- TIP: Disable arrow keys in normal mode
-vim.keymap.set('n', '<left>', '<cmd>echo "Use h to move!!"<CR>')
-vim.keymap.set('n', '<right>', '<cmd>echo "Use l to move!!"<CR>')
-vim.keymap.set('n', '<up>', '<cmd>echo "Use k to move!!"<CR>')
-vim.keymap.set('n', '<down>', '<cmd>echo "Use j to move!!"<CR>')
+--vim.keymap.set('n', '<left>', '<cmd>echo "Use h to move!!"<CR>')
+--vim.keymap.set('n', '<right>', '<cmd>echo "Use l to move!!"<CR>')
+--vim.keymap.set('n', '<up>', '<cmd>echo "Use k to move!!"<CR>')
+--vim.keymap.set('n', '<down>', '<cmd>echo "Use j to move!!"<CR>')
 
 -- Keybinds to make split navigation easier.
 --  Use CTRL+<hjkl> to switch between windows
@@ -233,6 +233,7 @@ require('lazy').setup({
   'folke/neoconf.nvim',
   {
     'yetone/avante.nvim',
+    commit = '58e0165',
     event = 'VeryLazy',
     lazy = false,
     version = false, -- set this if you want to always pull the latest change
@@ -279,18 +280,91 @@ require('lazy').setup({
     },
     config = function()
       require('avante').setup {
-        provider = 'openai',
-        auto_suggestions_provider = 'openaimini',
+        provider = 'xai',
+        auto_suggestions_provider = 'xai',
         vendors = {
-          ---@type AvanteSupportedProvider
-          openaimini = {
-            endpoint = 'https://api.openai.com/v1',
+          ---@type AvanteProvider
+          ['openai-mini'] = {
+            endpoint = 'https://api.openai.com/v1/chat/completions',
             api_key_name = 'OPENAI_API_KEY',
             model = 'gpt-4o-mini',
             timeout = 30000, -- Timeout in milliseconds
-            temperature = 0,
-            max_tokens = 4096,
             ['local'] = false,
+            parse_curl_args = function(opts, code_opts)
+              print(vim.inspect(opts))
+              print(vim.inspect(code_opts))
+              return {
+                url = opts.endpoint,
+                headers = {
+                  ['Accept'] = 'application/json',
+                  ['Content-Type'] = 'application/json',
+                  ['Authorization'] = 'Bearer ' .. os.getenv(opts.api_key_name),
+                },
+                body = {
+                  model = opts.model,
+                  messages = { -- you can make your own message, but this is very advanced
+                    { role = 'system', content = code_opts.system_prompt },
+                    { role = 'user', content = require('avante.providers.openai').get_user_message(code_opts) },
+                  },
+                  temperature = 0,
+                  max_tokens = 4096,
+                  stream = true, -- this will be set by default.
+                },
+              }
+            end,
+
+            parse_response_data = function(data_stream, event_state, opts)
+              require('avante.providers').openai.parse_response(data_stream, event_state, opts)
+            end,
+          },
+          ---@type AvanteProvider
+          ['xai'] = {
+            endpoint = 'https://api.x.ai/v1/chat/completions',
+            api_key_name = 'XAI_API_KEY',
+            model = 'grok-beta',
+            timeout = 30000, -- Timeout in milliseconds
+            temperature = 0,
+            ['local'] = false,
+            parse_curl_args = function(opts, code_opts)
+              print(vim.inspect(code_opts.messages))
+
+              -- Create a table to hold the content values
+              local user_messages = {}
+
+              -- Iterate over each sub-table in myTables
+              for _, subTable in ipairs(code_opts.messages) do
+                -- Check if the subTable has a "content" field
+                if subTable.content then
+                  -- If it does, add its value to the contents table
+                  table.insert(user_messages, subTable.content)
+                end
+              end
+
+              print(vim.inspect(user_messages))
+              local llm_user_message = table.concat(user_messages, '\n')
+              print(llm_user_message)
+              return {
+                url = opts.endpoint,
+                headers = {
+                  ['Accept'] = 'application/json',
+                  ['Content-Type'] = 'application/json',
+                  ['Authorization'] = 'Bearer ' .. os.getenv(opts.api_key_name),
+                },
+                body = {
+                  model = opts.model,
+                  messages = { -- you can make your own message, but this is very advanced
+                    { role = 'system', content = code_opts.system_prompt },
+                    { role = 'user', content = llm_user_message },
+                  },
+                  temperature = 0,
+                  max_tokens = 8192,
+                  stream = true, -- this will be set by default.
+                },
+              }
+            end,
+            parse_response_data = function(data_stream, event_state, opts)
+              require('avante.providers').openai.parse_response(data_stream, event_state, opts)
+            end,
           },
         },
       }
@@ -1013,10 +1087,16 @@ require('lazy').setup({
   --
   require 'kickstart.plugins.debug',
   require 'kickstart.plugins.indent_line',
-  require 'kickstart.plugins.lint',
+  -- require 'kickstart.plugins.lint',
   require 'kickstart.plugins.autopairs',
   require 'kickstart.plugins.neo-tree',
   require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
+
+  -- GVU - My plugins - Start
+  {
+    'tpope/vim-fugitive',
+  },
+  -- GVU - My plugins - End
 
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    This is the easiest way to modularize your config.
