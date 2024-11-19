@@ -233,7 +233,7 @@ require('lazy').setup({
   'folke/neoconf.nvim',
   {
     'yetone/avante.nvim',
-    commit = '58e0165',
+    --commit = '58e0165',
     event = 'VeryLazy',
     lazy = false,
     version = false, -- set this if you want to always pull the latest change
@@ -289,7 +289,6 @@ require('lazy').setup({
             api_key_name = 'OPENAI_API_KEY',
             model = 'gpt-4o-mini',
             timeout = 30000, -- Timeout in milliseconds
-            ['local'] = false,
             parse_curl_args = function(opts, code_opts)
               print(vim.inspect(opts))
               print(vim.inspect(code_opts))
@@ -324,9 +323,8 @@ require('lazy').setup({
             model = 'grok-beta',
             timeout = 30000, -- Timeout in milliseconds
             temperature = 0,
-            ['local'] = false,
             parse_curl_args = function(opts, code_opts)
-              print(vim.inspect(code_opts.messages))
+              print(vim.inspect(code_opts))
 
               -- Create a table to hold the content values
               local user_messages = {}
@@ -830,7 +828,6 @@ require('lazy').setup({
       }
     end,
   },
-
   { -- Autoformat
     'stevearc/conform.nvim',
     event = { 'BufWritePre' },
@@ -869,7 +866,9 @@ require('lazy').setup({
         -- python = { "isort", "black" },
         --
         -- You can use 'stop_after_first' to run the first available formatter from the list
+        typescript = { 'prettierd', 'prettier', stop_after_first = true },
         javascript = { 'prettierd', 'prettier', stop_after_first = true },
+        typescriptreact = { 'prettierd', 'prettier', stop_after_first = true },
         java = { 'google-java-format' },
         sql = { 'sleek' },
       },
@@ -947,9 +946,9 @@ require('lazy').setup({
 
           -- If you prefer more traditional completion keymaps,
           -- you can uncomment the following lines
-          -- ['<CR>'] = cmp.mapping.confirm { select = true },
-          -- ['<Tab>'] = cmp.mapping.select_next_item(),
-          -- ['<S-Tab>'] = cmp.mapping.select_prev_item(),
+          ['<CR>'] = cmp.mapping.confirm { select = true },
+          ['<Tab>'] = cmp.mapping.select_next_item(),
+          ['<S-Tab>'] = cmp.mapping.select_prev_item(),
 
           -- Manually trigger a completion from nvim-cmp.
           --  Generally you don't need this, because nvim-cmp will display
