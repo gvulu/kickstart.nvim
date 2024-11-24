@@ -273,7 +273,7 @@ require('lazy').setup({
         'MeanderingProgrammer/render-markdown.nvim',
         opts = {
           file_types = { 'markdown', 'Avante' },
-          auto_suggestions_provider = 'claude',
+          auto_suggestions_provider = 'xai',
         },
         ft = { 'markdown', 'Avante' },
       },
