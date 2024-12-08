@@ -588,6 +588,9 @@ require('lazy').setup({
     },
   },
   { 'Bilal2453/luvit-meta', lazy = true },
+  { 'mfussenegger/nvim-jdtls', dependencies = {
+    'nvim-dap',
+  } },
   {
     -- Main LSP Configuration
     'neovim/nvim-lspconfig',
@@ -596,7 +599,8 @@ require('lazy').setup({
       { 'williamboman/mason.nvim', config = true }, -- NOTE: Must be loaded before dependants
       'williamboman/mason-lspconfig.nvim',
       'WhoIsSethDaniel/mason-tool-installer.nvim',
-      'nvim-java/nvim-java',
+      'mfussenegger/nvim-jdtls',
+      --'nvim-java/nvim-java',
 
       -- Useful status updates for LSP.
       -- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
@@ -820,7 +824,7 @@ require('lazy').setup({
             require('lspconfig')[server_name].setup(server)
           end,
           jdtls = function()
-            require('java').setup {}
+            -- require('java').setup {}
 
             require('lspconfig').jdtls.setup {}
           end,
@@ -1085,7 +1089,7 @@ require('lazy').setup({
   --  Uncomment any of the lines below to enable them (you will need to restart nvim).
   --
   require 'kickstart.plugins.debug',
-  require 'kickstart.plugins.indent_line',
+  -- require 'kickstart.plugins.indent_line',
   -- require 'kickstart.plugins.lint',
   require 'kickstart.plugins.autopairs',
   require 'kickstart.plugins.neo-tree',
